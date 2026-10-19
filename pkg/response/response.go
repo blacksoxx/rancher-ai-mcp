@@ -38,6 +38,7 @@ func CreateMcpResponse(objs []*unstructured.Unstructured, cluster string, notes 
 	for _, obj := range objs {
 		unstructured.RemoveNestedField(obj.Object, "metadata", "managedFields")
 		unstructured.RemoveNestedField(obj.Object, "metadata", "annotations", "kubectl.kubernetes.io/last-applied-configuration")
+		maskSecretObject(obj)
 
 		gvk := obj.GetObjectKind().GroupVersionKind()
 		lowerKind := strings.ToLower(gvk.Kind)
@@ -105,7 +106,7 @@ func CreateMcpResponseAny(data any, uiContext ...UIContext) (string, error) {
 		return "", fmt.Errorf("failed to marshal response: %w", err)
 	}
 
-	return string(bytes), nil
+	return MaskSensitive(string(bytes)), nil
 }
 
 // OperationType represents the type of operation in a plan
